@@ -10,7 +10,7 @@
  * Elements that animate in on page load / scroll carry a `data-reveal` attribute. CSS pre-hides
  * them until a hook here takes over (see "Motion" in globals.css), so they don't flash before hydration.
  */
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -192,4 +192,45 @@ export function useResultEnter<T extends HTMLElement = HTMLElement>(variant: Res
       );
     }
   });
+}
+
+export type DemoScript = {
+  /** Text "typed" character by character; `onType` receives what has been typed so far. */
+  text: string;
+  typeDuration: number;
+  onType: (typed: string) => void;
+  /** Callbacks fired at absolute times (seconds) on the demo timeline. */
+  cues: { at: number; run: () => void }[];
+};
+
+/**
+ * Scripted demo runner: a typing effect plus timed cues on one timeline. `play` restarts it;
+ * it is killed on unmount. Under reduced motion the text appears at once — the cues still run on time.
+ */
+export function useDemo() {
+  const timeline = useRef<gsap.core.Timeline | null>(null);
+
+  useEffect(() => () => void timeline.current?.kill(), []);
+
+  return useCallback((script: DemoScript) => {
+    timeline.current?.kill();
+    const tl = gsap.timeline();
+    if (window.matchMedia(MOTION_OK).matches) {
+      const typed = { chars: 0 };
+      tl.to(
+        typed,
+        {
+          chars: script.text.length,
+          duration: script.typeDuration,
+          ease: "none",
+          onUpdate: () => script.onType(script.text.slice(0, Math.round(typed.chars))),
+        },
+        0,
+      );
+    } else {
+      script.onType(script.text);
+    }
+    for (const cue of script.cues) tl.call(cue.run, undefined, cue.at);
+    timeline.current = tl;
+  }, []);
 }

@@ -1,6 +1,8 @@
 # tasks/todo.md — Plan-First Workspace
 
-## Current Task: UI Polish, Bug Fixes, GSAP Animations, Demo Mode
+## Current Task: —
+
+## Done: UI Polish, Bug Fixes, GSAP Animations, Demo Mode
 
 ### Phase 1 — Bug fixes & polish
 - [x] `src/lib/mock-data.ts`: simulated results for every sample (typed against the `/api/*` response schemas).
@@ -14,16 +16,16 @@
 - [x] Metadata (`metadataBase`, Open Graph, Twitter) + `public/og-image.png` via `pnpm og`.
 
 ### Phase 2 — GSAP animations
-- [ ] `src/hooks/use-gsap.ts` — scoped hooks, reduced-motion aware, cleaned up on unmount.
-- [ ] Hero: word stagger, subtitle fade, form slide-up, dot-grid parallax.
-- [ ] Scroll reveals: bento grids, how-it-works + architecture sequences, network pills, explainers.
-- [ ] Result enters: verdict card, approvals rows, phishing shake / safe flash.
+- [x] `src/hooks/use-gsap.ts` — scoped hooks, reduced-motion aware, cleaned up on unmount.
+- [x] Hero: word stagger, subtitle fade, form slide-up, dot-grid parallax.
+- [x] Scroll reveals: bento grids, how-it-works + architecture sequences, network pills, explainers.
+- [x] Result enters: verdict card, approvals rows, phishing shake / safe flash.
 
 ### Phase 3 — Demo mode
-- [ ] WATCH DEMO next to the scanner form: type address → select network → loading → mock HIGH RISK verdict.
+- [x] WATCH DEMO next to the scanner form: type address → select network → loading → mock HIGH RISK verdict.
 
 ---
 
-## Done
+## Earlier
 
 - [x] Perbaikan 3 tombol sample di live mode (digantikan oleh mock client-side di Phase 1 di atas).

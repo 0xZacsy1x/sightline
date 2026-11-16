@@ -1,6 +1,7 @@
 import { Monitor, Radar, Server, ShieldCheck, type LucideIcon } from "lucide-react";
 
 import { MONO_LABEL } from "@/components/blueprint/primitives";
+import { Reveal } from "@/components/blueprint/reveal";
 import { cn } from "@/lib/utils";
 
 type Step = { icon: LucideIcon; tag: string; title: string; body: string; box: string };
@@ -36,22 +37,22 @@ const STEPS: Step[] = [
   },
 ];
 
-/** UI-REFERENCE.md §6.3 — vertical flow: Browser → Server Proxy → Webacy → Verdict Card. */
+/** UI-REFERENCE.md §6.3 — vertical flow: Browser → Server Proxy → Webacy → Verdict Card. Reveals top → bottom. */
 export function ArchitectureDiagram() {
   return (
-    <ol aria-label="Request flow" className="flex max-w-[720px] flex-col">
+    <Reveal as="ol" sequence y={24} start="top 80%" aria-label="Request flow" className="flex max-w-[720px] flex-col">
       {STEPS.map((step, i) => {
         const Icon = step.icon;
         const last = i === STEPS.length - 1;
         return (
-          <li key={step.title} className="flex gap-6">
+          <li key={step.title} data-reveal className="flex gap-6">
             {/* Rail: icon box, then connector line + chevron to the next step */}
             <div className="flex w-14 shrink-0 flex-col items-center">
               <div className={cn("flex h-14 w-14 shrink-0 items-center justify-center", step.box)}>
                 <Icon aria-hidden="true" className="size-6" strokeWidth={1.75} />
               </div>
               {last ? null : (
-                <div aria-hidden="true" className="flex flex-1 flex-col items-center">
+                <div aria-hidden="true" data-reveal="line-y" className="flex flex-1 flex-col items-center">
                   <span className="min-h-8 w-px flex-1 bg-brand-border-strong" />
                   <svg viewBox="0 0 12 8" className="h-2 w-3 text-brand-border-strong" fill="none">
                     <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.5" />
@@ -67,6 +68,6 @@ export function ArchitectureDiagram() {
           </li>
         );
       })}
-    </ol>
+    </Reveal>
   );
 }

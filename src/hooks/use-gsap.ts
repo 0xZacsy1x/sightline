@@ -87,3 +87,60 @@ export function useHeroIntro<T extends HTMLElement = HTMLDivElement>() {
     }
   });
 }
+
+export type RevealOptions = {
+  /** Offset the elements slide in from, in px. */
+  x?: number;
+  y?: number;
+  duration?: number;
+  stagger?: number;
+  delay?: number;
+  /** ScrollTrigger start, relative to the group. */
+  start?: string;
+  /**
+   * Reveal one after another on a timeline instead of a plain stagger. Elements marked
+   * `data-reveal="line-x"` / `"line-y"` are connector lines: they grow from their start edge.
+   */
+  sequence?: boolean;
+};
+
+/**
+ * Scroll reveal for a group: every `data-reveal` descendant of the ref'd element fades and
+ * slides in — once — when the group scrolls into view. Don't nest groups.
+ */
+export function useScrollReveal<T extends HTMLElement = HTMLDivElement>({
+  x = 0,
+  y = 32,
+  duration = 0.6,
+  stagger = 0.1,
+  delay = 0,
+  start = "top 85%",
+  sequence = false,
+}: RevealOptions = {}) {
+  return useGsap<T>((root, select) => {
+    const targets = claim(select("[data-reveal]"));
+    const scrollTrigger = { trigger: root, start, once: true };
+
+    if (!sequence) {
+      gsap.fromTo(
+        targets,
+        { x, y, opacity: 0 },
+        { x: 0, y: 0, opacity: 1, duration, ease: "power2.out", stagger, delay, scrollTrigger, clearProps: "transform" },
+      );
+      return;
+    }
+
+    const tl = gsap.timeline({ scrollTrigger, delay, defaults: { ease: "power2.out" } });
+    targets.forEach((el, i) => {
+      const at = i === 0 ? 0 : "-=0.2";
+      const kind = el.dataset.reveal;
+      if (kind === "line-x") {
+        tl.fromTo(el, { scaleX: 0, opacity: 1, transformOrigin: "left center" }, { scaleX: 1, duration: 0.4 }, at);
+      } else if (kind === "line-y") {
+        tl.fromTo(el, { scaleY: 0, opacity: 1, transformOrigin: "center top" }, { scaleY: 1, duration: 0.4 }, at);
+      } else {
+        tl.fromTo(el, { x, y, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.5, clearProps: "transform" }, at);
+      }
+    });
+  });
+}

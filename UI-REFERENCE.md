@@ -98,26 +98,32 @@ Mapping from Design Canvas fonts → Next.js:
 └─────────────────────────────────────────────────────────┘
 ```
 
+Layout: three columns. Left and right are both `flex-1` (equal widths), the nav keeps its natural
+width — so the nav links are always exactly centred, however different the two sides are.
+Never use `justify-between` here, and never centre with absolute positioning.
+
 Structure:
 ```tsx
 <header className="sticky top-0 z-50 border-b border-brand-border bg-white/[0.92] backdrop-blur-sm">
-  <div className="max-w-[1200px] mx-auto px-8 min-h-16 flex flex-wrap items-center justify-between gap-3 gap-x-6">
-    {/* Left: Logo */}
-    <div className="flex items-center gap-2.5">
+  <div className="max-w-[1200px] mx-auto px-8 min-h-16 flex flex-wrap items-center gap-3 gap-x-6">
+    {/* Left: Logo — flex-1 */}
+    <div className="flex-1 flex items-center gap-2.5">
       <SightlineLogo className="w-6 h-6" />  {/* Split S SVG, stroke cobalt */}
       <span className="font-sans font-bold text-lg tracking-tight">Sightline</span>
-      <span className="font-mono text-[10px] tracking-widest text-brand-cobalt border border-brand-cobalt px-2 py-0.5">READ-ONLY</span>
+      <span className="font-mono text-[10px] tracking-widest whitespace-nowrap text-brand-cobalt border border-brand-cobalt px-2 py-0.5">READ-ONLY</span>
     </div>
 
-    {/* Center: Nav */}
-    <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium">
-      {/* Active link: text-brand-cobalt border-b-2 border-brand-cobalt py-3 */}
-      {/* Inactive link: text-brand-dark py-3 */}
+    {/* Center: Nav — natural width; own centred row below 840px */}
+    <nav className="order-last w-full min-[840px]:order-none min-[840px]:w-auto">
+      <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium">
+        {/* Active link: text-brand-cobalt border-b-2 border-brand-cobalt py-3 */}
+        {/* Inactive link: text-brand-dark py-3 */}
+      </ul>
     </nav>
 
-    {/* Right: Mock badge + GitHub */}
-    <div className="flex items-center gap-3">
-      <span className="flex items-center gap-1.5 font-mono text-[11px] tracking-wide text-brand-muted-2 bg-brand-pill px-2.5 py-1">
+    {/* Right: Mock badge + GitHub — flex-1, justify-end */}
+    <div className="flex-1 flex items-center justify-end gap-3">
+      <span className="flex items-center gap-1.5 font-mono text-[11px] tracking-wide whitespace-nowrap text-brand-muted-2 bg-brand-pill px-2.5 py-1">
         <span className="w-1.5 h-1.5 bg-verdict-caution rounded-full" />
         MOCK MODE
       </span>

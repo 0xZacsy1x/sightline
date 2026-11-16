@@ -90,6 +90,8 @@
 @layer base {
   * {
     @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-brand-border-strong) transparent;
   }
   html {
     @apply font-sans;
@@ -102,6 +104,30 @@
     outline: 2px solid var(--color-brand-cobalt);
     outline-offset: 2px;
   }
+}
+
+/* ───────────────────────────────────────────────────────────
+   Custom Blueprint Scrollbar
+   Slim, unobtrusive, flat 2px-radius track & thumb matching
+   Sightline's technical ledger aesthetic.
+   ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-border-strong);
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-cobalt);
 }
 
 /* ───────────────────────────────────────────────────────────

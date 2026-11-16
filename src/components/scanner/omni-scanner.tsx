@@ -101,7 +101,7 @@ export function OmniScanner() {
           <FormCard
             role="search"
             aria-label="Scan an address, transaction, or URL"
-            className="min-w-0 flex-1 basis-[480px]"
+            className="min-w-0 flex-1 basis-120"
             onSubmit={(e) => {
               e.preventDefault();
               if (!busy) scan();

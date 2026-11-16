@@ -102,17 +102,15 @@ export default function GuidePage() {
               Sightline&apos;s source is public so anyone can verify that it stays read-only and fail-closed.
             </p>
           </div>
-          {GITHUB_URL ? (
-            <a
-              href={GITHUB_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex min-h-12 items-center gap-2.5 rounded-sm bg-brand-dark px-6 font-mono text-[13px] tracking-widest text-white transition-colors hover:bg-brand-cobalt"
-            >
-              <GitHubIcon className="h-4 w-4" />
-              VIEW ON GITHUB
-            </a>
-          ) : null}
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-12 items-center gap-2.5 rounded-sm bg-brand-dark px-6 font-mono text-[13px] tracking-widest text-white transition-colors hover:bg-brand-dark/90"
+          >
+            <GitHubIcon className="h-4 w-4" />
+            VIEW ON GITHUB
+          </a>
         </div>
       </Section>
     </>

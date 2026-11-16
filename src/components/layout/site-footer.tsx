@@ -31,7 +31,7 @@ export function SiteFooter() {
                 {NAV_ITEMS.map((item) => (
                   <li key={item.href}>
                     <Link href={item.href} className={LINK}>
-                      {item.footerLabel}
+                      {item.label}
                     </Link>
                   </li>
                 ))}

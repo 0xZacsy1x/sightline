@@ -2,6 +2,7 @@ import { FileCode2, KeyRound, Link2, Wallet } from "lucide-react";
 
 import { BentoCell, BentoGrid, NumberedItem, SectionHeading, SplitExplainer } from "@/components/blueprint/layouts";
 import { MONO_LABEL } from "@/components/blueprint/primitives";
+import { Reveal } from "@/components/blueprint/reveal";
 import { Section, SectionLabel } from "@/components/blueprint/section";
 import { VERDICT_STYLES, verdictLabel } from "@/components/blueprint/verdict-badge";
 import type { Verdict } from "@/lib/scan/types";
@@ -61,9 +62,10 @@ export function HowItWorksSection() {
           <SectionLabel>HOW IT WORKS</SectionLabel>
           <SectionHeading>Three steps, zero signatures.</SectionHeading>
         </div>
-        <ol className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        {/* Sequence: step 1 → its line grows → step 2 → … */}
+        <Reveal as="ol" sequence y={24} start="top 80%" className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {STEPS.map((step, i) => (
-            <li key={step.title} className="flex flex-col gap-4">
+            <li key={step.title} data-reveal className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
                 <span
                   className={cn(
@@ -73,13 +75,13 @@ export function HowItWorksSection() {
                 >
                   {i + 1}
                 </span>
-                <span aria-hidden="true" className="h-px flex-1 bg-brand-border" />
+                <span aria-hidden="true" data-reveal="line-x" className="h-px flex-1 bg-brand-border" />
               </div>
               <h3 className="font-sans text-lg font-semibold tracking-tight text-brand-dark">{step.title}</h3>
               <p className="text-sm leading-relaxed text-[#3A4458]">{step.body}</p>
             </li>
           ))}
-        </ol>
+        </Reveal>
       </div>
     </Section>
   );
@@ -91,18 +93,21 @@ export function NetworksSection() {
     <Section size="minor">
       <div className="flex flex-wrap items-center justify-between gap-6">
         <SectionLabel>SUPPORTED NETWORKS</SectionLabel>
-        <div className="flex flex-wrap items-center gap-3">
+        <Reveal x={-20} y={0} duration={0.5} stagger={0.08} className="flex flex-wrap items-center gap-3">
           <span className={MONO_LABEL}>LIVE</span>
           {["Base", "Arbitrum", "Ethereum"].map((name) => (
-            <span key={name} className="rounded-sm bg-brand-dark px-4 py-2 text-sm font-medium text-white">
+            <span key={name} data-reveal className="rounded-sm bg-brand-dark px-4 py-2 text-sm font-medium text-white">
               {name}
             </span>
           ))}
           <span className={cn(MONO_LABEL, "ml-3")}>ROADMAP</span>
-          <span className="rounded-sm border border-dashed border-brand-border-strong px-4 py-2 text-sm text-brand-muted-2">
+          <span
+            data-reveal
+            className="rounded-sm border border-dashed border-brand-border-strong px-4 py-2 text-sm text-brand-muted-2"
+          >
             Solana
           </span>
-        </div>
+        </Reveal>
       </div>
     </Section>
   );

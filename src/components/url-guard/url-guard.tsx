@@ -3,13 +3,12 @@
 import { useId, useState } from "react";
 
 import { FieldError, FormCard, FormInput, MONO_LABEL, PrimaryButton, SecondaryButton } from "@/components/blueprint/primitives";
-import { Section, SectionLabel } from "@/components/blueprint/section";
-import { EmptyState, ErrorState, LoadingState } from "@/components/blueprint/states";
+import { ResultSection } from "@/components/blueprint/result-section";
 import { PageHero } from "@/components/layout/page-hero";
 import { UrlResultCard } from "@/components/url-guard/url-result";
 import { useApiPost } from "@/lib/client/use-api-post";
-import { SAMPLES } from "@/lib/samples";
-import { UrlCheckResultSchema } from "@/lib/scan/types";
+import { MOCK_URL_PHISHING, MOCK_URL_SAFE } from "@/lib/mock-data";
+import { UrlCheckResultSchema, type UrlCheckResult } from "@/lib/scan/types";
 import { MAX_INPUT_LENGTH, normalizeUrl } from "@/lib/validations/scan";
 
 const ERROR_INVALID = "Enter a valid http(s) URL or domain, e.g. https://app.example.org.";
@@ -18,13 +17,13 @@ const ERROR_INVALID = "Enter a valid http(s) URL or domain, e.g. https://app.exa
 export function UrlGuard() {
   const [value, setValue] = useState("");
   const [fieldError, setFieldError] = useState<string | null>(null);
-  const { state, run } = useApiPost("/api/url-check", UrlCheckResultSchema);
+  const { state, run, retry, simulate } = useApiPost("/api/url-check", UrlCheckResultSchema);
   const loading = state.status === "loading";
   const inputId = useId();
   const errorId = useId();
 
-  function check(raw: string) {
-    const url = normalizeUrl(raw);
+  function check() {
+    const url = normalizeUrl(value);
     if (!url) {
       setFieldError(ERROR_INVALID);
       return;
@@ -33,9 +32,11 @@ export function UrlGuard() {
     void run({ url });
   }
 
-  function checkSample(sample: string) {
-    setValue(sample);
-    check(sample);
+  /** Sample buttons: fill the form and show the simulated result — no API call. */
+  function showSample(sample: UrlCheckResult) {
+    setFieldError(null);
+    setValue(sample.url);
+    simulate(sample);
   }
 
   return (
@@ -51,7 +52,7 @@ export function UrlGuard() {
           aria-label="Check a URL"
           onSubmit={(e) => {
             e.preventDefault();
-            if (!loading) check(value);
+            if (!loading) check();
           }}
         >
           <div className="flex flex-col gap-2">
@@ -82,11 +83,11 @@ export function UrlGuard() {
 
           <div className="flex flex-wrap items-center gap-3 border-t border-dashed border-brand-border-strong pt-5">
             <span className="text-sm text-[#3A4458]">Try a sample:</span>
-            <SecondaryButton disabled={loading} onClick={() => checkSample(SAMPLES.safeUrl)}>
+            <SecondaryButton disabled={loading} onClick={() => showSample(MOCK_URL_SAFE)}>
               <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-verdict-safe" />
               Safe URL
             </SecondaryButton>
-            <SecondaryButton disabled={loading} onClick={() => checkSample(SAMPLES.phishingUrl)}>
+            <SecondaryButton disabled={loading} onClick={() => showSample(MOCK_URL_PHISHING)}>
               <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-verdict-risk" />
               Phishing URL
             </SecondaryButton>
@@ -94,17 +95,16 @@ export function UrlGuard() {
         </FormCard>
       </PageHero>
 
-      <Section aria-labelledby="url-result-label">
-        <div className="flex flex-col gap-6" aria-live="polite" aria-busy={loading}>
-          <SectionLabel>
-            <span id="url-result-label">RESULT</span>
-          </SectionLabel>
-          {state.status === "idle" ? <EmptyState>No URL checked yet — paste one above or try a sample.</EmptyState> : null}
-          {state.status === "loading" ? <LoadingState>CHECKING URL…</LoadingState> : null}
-          {state.status === "error" ? <ErrorState message={state.message} /> : null}
-          {state.status === "success" ? <UrlResultCard result={state.data} /> : null}
-        </div>
-      </Section>
+      <ResultSection
+        label="RESULT"
+        state={state}
+        empty="No URL checked yet — paste one above or try a sample."
+        loading="CHECKING URL…"
+        skeleton="url"
+        onRetry={retry}
+      >
+        {(result, sample) => <UrlResultCard result={result} sample={sample} />}
+      </ResultSection>
     </>
   );
 }

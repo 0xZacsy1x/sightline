@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import type { ApprovalRow, ApprovalsResult } from "@/lib/scan/types";
 import { VERDICT_SORT_RANK, verdictFromScore } from "@/lib/scan/verdict";
-import { SAMPLES } from "@/lib/samples";
 import { mockApprovals } from "@/lib/server/mock";
 import { MAX_ITEMS, TagSchema, cleanText, failureNote, webacyFetch } from "@/lib/server/webacy-client";
 import { isMockMode } from "@/lib/site";
@@ -162,61 +161,9 @@ export function sortApprovals(rows: ApprovalRow[]): ApprovalRow[] {
   );
 }
 
-/** Realistic deterministic sample approvals for the sample wallet button. */
-export const SAMPLE_APPROVALS_ROWS: ApprovalRow[] = [
-  {
-    tokenSymbol: "USDC",
-    tokenName: "USD Coin",
-    tokenAddress: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-    spenderName: "Unverified Token Drainer",
-    spenderAddress: "0x7a25000000000000000000000000000000c0ffee",
-    allowance: { unlimited: true, display: "UNLIMITED" },
-    verdict: "HIGH_RISK",
-    reasons: [
-      "Spender address flagged by risk engine as suspicious drainer",
-      "Unlimited allowance granted to unverified contract",
-    ],
-  },
-  {
-    tokenSymbol: "WETH",
-    tokenName: "Wrapped Ether",
-    tokenAddress: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-    spenderName: "Unverified Staking Router",
-    spenderAddress: "0x9f3a00000000000000000000000000000000d00d",
-    allowance: { unlimited: true, display: "UNLIMITED" },
-    verdict: "HIGH_RISK",
-    reasons: [
-      "Contract source code unverified",
-      "Unlimited allowance allows draining full WETH balance",
-    ],
-  },
-  {
-    tokenSymbol: "DAI",
-    tokenName: "Dai Stablecoin",
-    tokenAddress: "0x6b175474e89094c44da98b954eedeac495271d0f",
-    spenderName: "Uniswap V3 Router",
-    spenderAddress: "0xe592427a0aece92de3edee1f18e0157c05861564",
-    allowance: { unlimited: true, display: "UNLIMITED" },
-    verdict: "CAUTION",
-    reasons: ["Reputable DEX router, but allowance never expires"],
-  },
-  {
-    tokenSymbol: "USDT",
-    tokenName: "Tether USD",
-    tokenAddress: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-    spenderName: "Aave V3 Pool",
-    spenderAddress: "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
-    allowance: { unlimited: false, display: "500 USDT" },
-    verdict: "SAFE",
-    reasons: ["Verified Aave contract with limited allowance"],
-  },
-];
-
 export async function getApprovals(req: ApprovalsRequest): Promise<ApprovalsResult> {
   const base = { wallet: req.wallet, chain: req.chain };
   if (isMockMode()) return { ...base, ...mockApprovals(req) };
-
-  const isSampleWallet = req.wallet.toLowerCase() === SAMPLES.approvalsWallet.toLowerCase();
 
   const unknown = (note: string): ApprovalsResult => ({
     ...base,
@@ -227,7 +174,7 @@ export async function getApprovals(req: ApprovalsRequest): Promise<ApprovalsResu
   });
 
   try {
-    // 15-second timeout for approvals query (vitalik.eth and large wallets have many txs)
+    // 15-second timeout: wallets with a long history take a while to enumerate.
     const json = await webacyFetch(`/addresses/${req.wallet}/approvals?chain=${req.chain}`, undefined, 15_000);
 
     // Try Webacy v2 format first
@@ -253,16 +200,8 @@ export async function getApprovals(req: ApprovalsRequest): Promise<ApprovalsResu
       }
     }
 
-    // If sample wallet and upstream returned no entries or unrecognised format, fallback to sample approvals
-    if (isSampleWallet) {
-      return { ...base, status: "ok", approvals: sortApprovals(SAMPLE_APPROVALS_ROWS), mode: "live", note: null };
-    }
-
     return unknown("Unrecognised Webacy response format.");
   } catch (error) {
-    if (isSampleWallet) {
-      return { ...base, status: "ok", approvals: sortApprovals(SAMPLE_APPROVALS_ROWS), mode: "live", note: null };
-    }
     return unknown(failureNote("approvals", error));
   }
 }

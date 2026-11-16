@@ -1,10 +1,13 @@
 /** Site-wide constants and links shown in the navbar/footer. */
 
-/** Public repo URL. Set this once the repo is pushed; the GitHub links stay hidden while it is null. */
-export const GITHUB_URL: string | null = null;
+/** Public source repo — linked from the navbar, the footer, and the guide. */
+export const GITHUB_URL = "https://github.com/0xZacsy1x/sightline";
+
+/** Production origin: resolves relative metadata URLs (Open Graph / Twitter images). */
+export const SITE_URL = "https://sightline-nine-pi.vercel.app";
 
 export const RESOURCE_LINKS = [
-  ...(GITHUB_URL ? [{ label: "GitHub", href: GITHUB_URL }] : []),
+  { label: "GitHub", href: GITHUB_URL },
   { label: "DD.xyz", href: "https://dd.xyz" },
   { label: "Webacy", href: "https://webacy.com" },
 ] as const satisfies readonly { label: string; href: string }[];

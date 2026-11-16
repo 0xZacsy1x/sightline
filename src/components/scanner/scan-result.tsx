@@ -3,6 +3,7 @@ import { ExternalLink } from "lucide-react";
 import { MockDataBanner } from "@/components/blueprint/mock-data-banner";
 import { MONO_LABEL } from "@/components/blueprint/primitives";
 import { SeverityBadge, VERDICT_ICON, VERDICT_STYLES, verdictLabel } from "@/components/blueprint/verdict-badge";
+import { useResultEnter } from "@/hooks/use-gsap";
 import { accountTypeLabel, truncateHex } from "@/lib/format";
 import type { ScanResult, Verdict } from "@/lib/scan/types";
 import { cn } from "@/lib/utils";
@@ -50,22 +51,26 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 /** UI-REFERENCE.md §3.2 — verdict panel (left) + details & findings (right). All API strings as text. */
-export function ScanResultCard({ result }: { result: ScanResult }) {
+export function ScanResultCard({ result, sample = false }: { result: ScanResult; sample?: boolean }) {
   const { verdict, score, findings } = result;
   const styles = VERDICT_STYLES[verdict];
   const Icon = VERDICT_ICON[verdict];
   const explorer = explorerLink(result);
+  const ref = useResultEnter<HTMLElement>("pop");
 
   return (
     <div className="flex flex-col gap-4">
-      {result.mode === "mock" ? <MockDataBanner /> : null}
+      {sample || result.mode === "mock" ? <MockDataBanner sample={sample} /> : null}
 
       <article
+        ref={ref}
         aria-labelledby="scan-verdict"
         className="grid grid-cols-1 border border-brand-border bg-white md:grid-cols-[minmax(260px,1fr)_1.6fr]"
       >
         {/* Left: verdict */}
-        <div className={cn("flex flex-col gap-5 p-7", styles.panel)}>
+        <div className={cn("relative flex flex-col gap-5 p-7", styles.panel)}>
+          {/* Verdict-coloured tint that fades out as the card enters. */}
+          <span aria-hidden="true" data-flash className={cn("pointer-events-none absolute inset-0 opacity-0", styles.fill)} />
           <Icon aria-hidden="true" className={cn("size-9", styles.text)} strokeWidth={1.75} />
           <div className="flex flex-col gap-2">
             <h3 id="scan-verdict" className={cn("font-sans text-[28px] leading-none font-semibold tracking-tight", styles.text)}>
@@ -105,6 +110,7 @@ export function ScanResultCard({ result }: { result: ScanResult }) {
                 {findings.map((finding, i) => (
                   <li
                     key={finding.text}
+                    data-enter-row
                     className="flex items-start gap-4 border-b border-dashed border-brand-border py-3 text-sm text-brand-dark"
                   >
                     <span className="pt-0.5 font-mono text-[11px] tracking-widest text-brand-muted-2">

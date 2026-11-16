@@ -1,12 +1,18 @@
 /**
- * Mock mode (no WEBACY_API_KEY). Only the sample inputs in lib/samples.ts get simulated
+ * Mock mode (no WEBACY_API_KEY). Only the sample inputs in lib/mock-data.ts get simulated
  * results; every other input returns UNKNOWN, so a real address can never get a fake SAFE.
  * Every result here carries `mode: "mock"`, which the UI always surfaces with the MOCK DATA banner.
  *
  * Self-contained on purpose (no imports from scan/url-check/approvals) to avoid import cycles.
  */
+import {
+  MOCK_APPROVALS,
+  MOCK_RISKY_CONTRACT,
+  MOCK_SAFE_EOA,
+  MOCK_URL_PHISHING,
+  MOCK_URL_SAFE,
+} from "@/lib/mock-data";
 import type { ApprovalsResult, ScanResult, UrlCheckResult } from "@/lib/scan/types";
-import { SAMPLES } from "@/lib/samples";
 import type { ApprovalsRequest, ScanRequest } from "@/lib/validations/scan";
 
 const NOT_A_SAMPLE = "Mock mode: only the sample inputs have simulated results. Set WEBACY_API_KEY for live scans.";
@@ -14,26 +20,12 @@ const NOT_A_SAMPLE = "Mock mode: only the sample inputs have simulated results. 
 type ScanEvaluation = Pick<ScanResult, "verdict" | "score" | "findings" | "addressType" | "note">;
 
 export function mockScan(req: ScanRequest): ScanEvaluation {
-  const val = req.value.toLowerCase();
-  if (val === SAMPLES.safeEoa.toLowerCase()) {
-    return { verdict: "SAFE", score: 4, findings: [], addressType: "EOA", note: null };
-  }
-  if (val === SAMPLES.riskyContract.toLowerCase()) {
-    return {
-      verdict: "HIGH_RISK",
-      score: 100,
-      findings: [
-        { text: "Sanctioned Activity reported by world authorities (OFAC / OpenSanctions)", severity: "HIGH" },
-        { text: "BUSD Banned — address frozen by Paxos on at least one chain", severity: "HIGH" },
-        { text: "Access Control — users with special privileges can modify contract code", severity: "HIGH" },
-        { text: "External Function — makes unsafe external calls (.call()) without proper validation", severity: "HIGH" },
-        { text: "Vulnerable to reentrancy attacks with or without ETH transfer", severity: "MEDIUM" },
-      ],
-      addressType: "CONTRACT",
-      note: null,
-    };
-  }
-  return { verdict: "UNKNOWN", score: null, findings: [], addressType: null, note: NOT_A_SAMPLE };
+  const sample = [MOCK_SAFE_EOA, MOCK_RISKY_CONTRACT].find(
+    (mock) => mock.input.toLowerCase() === req.value.toLowerCase(),
+  );
+  if (!sample) return { verdict: "UNKNOWN", score: null, findings: [], addressType: null, note: NOT_A_SAMPLE };
+  const { verdict, score, findings, addressType, note } = sample;
+  return { verdict, score, findings, addressType, note };
 }
 
 function hostname(url: string): string {
@@ -46,35 +38,8 @@ function hostname(url: string): string {
 
 export function mockUrlCheck(url: string): UrlCheckResult {
   const domain = hostname(url);
-  if (domain === hostname(SAMPLES.phishingUrl)) {
-    return {
-      verdict: "HIGH_RISK",
-      url,
-      domain,
-      category: "Phishing / Drainer Site",
-      domainAge: "2 days",
-      reasons: [
-        "Domain mimics OpenSea using leet-speak (0 → o, 3 → e, 1 → i)",
-        "Created 2 days ago — a common red flag for drainer sites",
-        "/claim path is commonly used by wallet drainers",
-        "Not listed in the verified dApp database",
-      ],
-      mode: "mock",
-      note: null,
-    };
-  }
-  if (domain === hostname(SAMPLES.safeUrl)) {
-    return {
-      verdict: "SAFE",
-      url,
-      domain,
-      category: "Verified dApp",
-      domainAge: "6+ years",
-      reasons: ["This URL is listed as a verified dApp site."],
-      mode: "mock",
-      note: null,
-    };
-  }
+  const sample = [MOCK_URL_PHISHING, MOCK_URL_SAFE].find((mock) => mock.domain === domain);
+  if (sample) return { ...sample, url, domain };
   return {
     verdict: "UNKNOWN",
     url,
@@ -88,54 +53,9 @@ export function mockUrlCheck(url: string): UrlCheckResult {
 }
 
 export function mockApprovals(req: ApprovalsRequest): Omit<ApprovalsResult, "wallet" | "chain"> {
-  if (req.wallet !== SAMPLES.approvalsWallet) {
+  if (req.wallet !== MOCK_APPROVALS.wallet) {
     return { status: "unknown", approvals: [], mode: "mock", note: NOT_A_SAMPLE };
   }
-  return {
-    status: "ok",
-    mode: "mock",
-    note: null,
-    approvals: [
-      {
-        tokenSymbol: "USDC",
-        tokenName: "USD Coin",
-        tokenAddress: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-        spenderName: "Unknown Contract",
-        spenderAddress: "0x7a25000000000000000000000000000000c0ffee",
-        allowance: { unlimited: true, display: "UNLIMITED" },
-        verdict: "HIGH_RISK",
-        reasons: ["Spender linked to a reported drainer", "Unlimited allowance"],
-      },
-      {
-        tokenSymbol: "WETH",
-        tokenName: "Wrapped Ether",
-        tokenAddress: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-        spenderName: "Unverified Contract",
-        spenderAddress: "0x9f3a00000000000000000000000000000000d00d",
-        allowance: { unlimited: true, display: "UNLIMITED" },
-        verdict: "HIGH_RISK",
-        reasons: ["Unverified source code", "Unlimited allowance"],
-      },
-      {
-        tokenSymbol: "DAI",
-        tokenName: "Dai Stablecoin",
-        tokenAddress: "0x6b175474e89094c44da98b954eedeac495271d0f",
-        spenderName: "Uniswap V3 Router",
-        spenderAddress: "0xe592427a0aece92de3edee1f18e0157c05861564",
-        allowance: { unlimited: true, display: "UNLIMITED" },
-        verdict: "CAUTION",
-        reasons: ["Reputable spender, but the allowance never expires"],
-      },
-      {
-        tokenSymbol: "USDT",
-        tokenName: "Tether USD",
-        tokenAddress: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-        spenderName: "Aave V3 Pool",
-        spenderAddress: "0x87870bca3f3fd6335c3f4ce8392d69350b4fa4e2",
-        allowance: { unlimited: false, display: "500 USDT" },
-        verdict: "SAFE",
-        reasons: [],
-      },
-    ],
-  };
+  const { status, approvals, mode, note } = MOCK_APPROVALS;
+  return { status, approvals, mode, note };
 }

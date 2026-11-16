@@ -103,3 +103,23 @@
     outline-offset: 2px;
   }
 }
+
+/* ───────────────────────────────────────────────────────────
+   Motion (GSAP — src/hooks/use-gsap.ts)
+   Elements that animate in carry `data-reveal`. They start hidden so the entrance
+   doesn't flash on first paint, but only when scripting is on and motion is allowed.
+   The hooks cancel the failsafe when they take over; if the script never arrives,
+   the failsafe shows the content anyway. Content is never left invisible.
+   ─────────────────────────────────────────────────────────── */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    opacity: 0;
+    animation: reveal-failsafe 0.3s linear 4s forwards;
+  }
+}
+
+@keyframes reveal-failsafe {
+  to {
+    opacity: 1;
+  }
+}

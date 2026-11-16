@@ -13,9 +13,9 @@ Kalau token/warna/radius di `DESIGN.md` bertabrakan dengan `UI-REFERENCE.md`, ik
 
 ## Commands
 
-- `npm run dev` — dev server
-- `npm run lint` — eslint + `tsc --noEmit`
-- `npm run build` — production build; setelahnya cek `grep -rE "x-api-key|api\.webacy\.com" .next/static/` harus kosong,
+- `pnpm dev` — dev server
+- `pnpm lint` — eslint + `tsc --noEmit`
+- `pnpm build` — production build; setelahnya cek `grep -rE "x-api-key|api\.webacy\.com" .next/static/` harus kosong,
   dan nilai key dari `.env.local` tidak boleh muncul di `.next/static/`.
   (`grep WEBACY_API_KEY` saja akan selalu match teks banner MOCK DATA — itu nama variabel, bukan nilainya.)
 
@@ -40,10 +40,10 @@ Next.js 15 App Router, TypeScript strict, Tailwind + shadcn/ui, Zod, Geist font 
 
 ## Commands
 
-- Dev: `npm run dev`
-- Build: `npm run build`
-- Lint: `npm run lint`
-- Type check: `npx tsc --noEmit`
+- Dev: `pnpm dev`
+- Build: `pnpm build`
+- Lint: `pnpm lint`
+- Type check: `pnpm tsc --noEmit`
 
 ## Security Rules (NON-NEGOTIABLE)
 

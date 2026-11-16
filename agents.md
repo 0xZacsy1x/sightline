@@ -21,10 +21,10 @@ Kompatibel dengan `CLAUDE.md` — bisa disalin/symlink menjadi `CLAUDE.md` jika 
 ## Commands
 
 ```bash
-npm run dev              # dev server (localhost:3000)
-npm run build            # production build
-npm run lint             # eslint + typecheck
-npm run test             # vitest
+pnpm dev                 # dev server (localhost:3000)
+pnpm build               # production build
+pnpm lint                # eslint + typecheck
+pnpm test                # vitest
 ```
 
 ## Konvensi
@@ -38,7 +38,7 @@ npm run test             # vitest
 ## Do
 
 - Sebelum mulai task yang menyentuh >1 file, tulis checklist rencana ke `tasks/todo.md` dulu.
-- Jalankan `npm run lint` dan `npm run test` sebelum menganggap task selesai.
+- Jalankan `pnpm lint` dan `pnpm test` sebelum menganggap task selesai.
 - Pastikan setiap endpoint baru ke Webacy mengikuti path v2/v3 resmi (tanpa prefix `/api/` di URL `api.webacy.com`) dan menyertakan header `x-api-key`.
 
 ## Don't

@@ -25,19 +25,23 @@ export function OmniScanner() {
   const errorId = useId();
   const networkLabelId = useId();
 
-  function scan(raw: string) {
+  function scan(raw: string, overrideChain?: Chain) {
+    const activeChain = overrideChain ?? chain;
     const detected = detectInput(raw);
     if (!detected) {
       setFieldError(ERROR_INVALID);
       return;
     }
     setFieldError(null);
-    void run({ input: detected.value, chain });
+    void run({ input: detected.value, chain: activeChain });
   }
 
-  function scanSample(sample: string) {
+  function scanSample(sample: string, targetChain?: Chain) {
+    if (targetChain) {
+      setChain(targetChain);
+    }
     setValue(sample);
-    scan(sample);
+    scan(sample, targetChain);
   }
 
   return (
@@ -105,11 +109,11 @@ export function OmniScanner() {
 
           <div className="flex flex-wrap items-center gap-3 border-t border-dashed border-brand-border-strong pt-5">
             <span className="text-sm text-[#3A4458]">Try a sample:</span>
-            <SecondaryButton disabled={loading} onClick={() => scanSample(SAMPLES.safeEoa)}>
+            <SecondaryButton disabled={loading} onClick={() => scanSample(SAMPLES.safeEoa, "eth")}>
               <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-verdict-safe" />
               Safe EOA
             </SecondaryButton>
-            <SecondaryButton disabled={loading} onClick={() => scanSample(SAMPLES.riskyContract)}>
+            <SecondaryButton disabled={loading} onClick={() => scanSample(SAMPLES.riskyContract, "eth")}>
               <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-verdict-risk" />
               Risky Contract
             </SecondaryButton>

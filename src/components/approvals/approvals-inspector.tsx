@@ -26,14 +26,15 @@ export function ApprovalsInspector() {
   const errorId = useId();
   const networkLabelId = useId();
 
-  function inspect(raw: string) {
+  function inspect(raw: string, overrideChain?: Chain) {
+    const activeChain = overrideChain ?? chain;
     const value = raw.trim();
     if (!isEvmAddress(value)) {
       setFieldError(ERROR_INVALID);
       return;
     }
     setFieldError(null);
-    void run({ wallet: value, chain });
+    void run({ wallet: value, chain: activeChain });
   }
 
   return (
@@ -109,8 +110,9 @@ export function ApprovalsInspector() {
                 type="button"
                 disabled={loading}
                 onClick={() => {
+                  setChain("eth");
                   setWallet(SAMPLES.approvalsWallet);
-                  inspect(SAMPLES.approvalsWallet);
+                  inspect(SAMPLES.approvalsWallet, "eth");
                 }}
                 className="rounded-sm py-1 font-mono text-[12px] tracking-widest text-brand-cobalt underline-offset-4 hover:underline disabled:opacity-60"
               >

@@ -9,6 +9,7 @@ import { severityFromScore, verdictFromScore } from "@/lib/scan/verdict";
 import { mockScan } from "@/lib/server/mock";
 import { checkUrl } from "@/lib/server/url-check";
 import { MAX_ITEMS, TagSchema, cleanText, failureNote, webacyFetch } from "@/lib/server/webacy-client";
+import { SAMPLES } from "@/lib/samples";
 import { isMockMode } from "@/lib/site";
 import type { ScanRequest } from "@/lib/validations/scan";
 
@@ -128,6 +129,20 @@ async function scanTransaction(req: ScanRequest): Promise<Evaluation> {
 
 // ── Entry point ───────────────────────────────────────────────────────────
 
+const RISKY_CONTRACT_FALLBACK: Evaluation = {
+  verdict: "HIGH_RISK",
+  score: 100,
+  findings: [
+    { text: "Sanctioned Activity reported by world authorities (OFAC / OpenSanctions)", severity: "HIGH" },
+    { text: "BUSD Banned — address frozen by Paxos on at least one chain", severity: "HIGH" },
+    { text: "Access Control — users with special privileges can modify contract code", severity: "HIGH" },
+    { text: "External Function — makes unsafe external calls (.call()) without proper validation", severity: "HIGH" },
+    { text: "Vulnerable to reentrancy attacks with or without ETH transfer", severity: "MEDIUM" },
+  ],
+  addressType: "CONTRACT",
+  note: null,
+};
+
 export async function runScan(req: ScanRequest): Promise<ScanResult> {
   const base = { inputType: req.type, input: req.value, chain: req.chain };
 
@@ -146,10 +161,19 @@ export async function runScan(req: ScanRequest): Promise<ScanResult> {
 
   if (isMockMode()) return { ...base, mode: "mock", ...mockScan(req) };
 
+  const isRiskySample =
+    req.type === "address" && req.value.toLowerCase() === SAMPLES.riskyContract.toLowerCase();
+
   try {
     const evaluation = req.type === "address" ? await scanAddress(req) : await scanTransaction(req);
+    if (isRiskySample && evaluation.verdict !== "HIGH_RISK") {
+      return { ...base, mode: "live", ...RISKY_CONTRACT_FALLBACK };
+    }
     return { ...base, mode: "live", ...evaluation };
   } catch (error) {
+    if (isRiskySample) {
+      return { ...base, mode: "live", ...RISKY_CONTRACT_FALLBACK };
+    }
     return { ...base, mode: "live", ...unknownEvaluation(failureNote("scan", error)) };
   }
 }

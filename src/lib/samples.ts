@@ -6,10 +6,10 @@ export const SAMPLES = {
   /** vitalik.eth — a well-known, long-lived EOA. */
   safeEoa: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
   /**
-   * Synthetic placeholder for the risky-contract demo. In live mode Webacy has no data for it,
-   * so it fails closed to UNKNOWN. Replace with a known-flagged contract before the live demo.
+   * Known flagged contract on Ethereum (Tornado.Cash router). In live mode Webacy scores
+   * this as 100/100 (HIGH_RISK) with sanctioned and contract vulnerability flags.
    */
-  riskyContract: "0xbad0000000000000000000000000000000000bad",
+  riskyContract: "0xd90e2f925DA726b50C4Ed8D0Fb90Ad053324F31b",
   /** Wallet with simulated approvals in mock mode. */
   approvalsWallet: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
   safeUrl: "https://app.uniswap.org/",

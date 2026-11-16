@@ -14,17 +14,20 @@ const NOT_A_SAMPLE = "Mock mode: only the sample inputs have simulated results. 
 type ScanEvaluation = Pick<ScanResult, "verdict" | "score" | "findings" | "addressType" | "note">;
 
 export function mockScan(req: ScanRequest): ScanEvaluation {
-  if (req.value === SAMPLES.safeEoa) {
+  const val = req.value.toLowerCase();
+  if (val === SAMPLES.safeEoa.toLowerCase()) {
     return { verdict: "SAFE", score: 4, findings: [], addressType: "EOA", note: null };
   }
-  if (req.value === SAMPLES.riskyContract) {
+  if (val === SAMPLES.riskyContract.toLowerCase()) {
     return {
       verdict: "HIGH_RISK",
-      score: 86,
+      score: 100,
       findings: [
-        { text: "Unlimited approval requested on deposit (approve max uint256)", severity: "HIGH" },
-        { text: "Unverified source code — bytecode only, no published ABI", severity: "HIGH" },
-        { text: "Owner can modify balances and fees after deployment", severity: "MEDIUM" },
+        { text: "Sanctioned Activity reported by world authorities (OFAC / OpenSanctions)", severity: "HIGH" },
+        { text: "BUSD Banned — address frozen by Paxos on at least one chain", severity: "HIGH" },
+        { text: "Access Control — users with special privileges can modify contract code", severity: "HIGH" },
+        { text: "External Function — makes unsafe external calls (.call()) without proper validation", severity: "HIGH" },
+        { text: "Vulnerable to reentrancy attacks with or without ETH transfer", severity: "MEDIUM" },
       ],
       addressType: "CONTRACT",
       note: null,

@@ -14,14 +14,14 @@ const TIMEOUT_MS = 8_000;
 export const MAX_TEXT_LENGTH = 200;
 export const MAX_ITEMS = 20;
 
-export async function webacyFetch(path: string, init?: RequestInit): Promise<unknown> {
+export async function webacyFetch(path: string, init?: RequestInit, timeoutMs = TIMEOUT_MS): Promise<unknown> {
   const apiKey = process.env.WEBACY_API_KEY;
   if (!apiKey) throw new Error("WEBACY_API_KEY is not set");
 
   const res = await fetch(`${WEBACY_BASE_URL}${path}`, {
     ...init,
     headers: { accept: "application/json", "x-api-key": apiKey, ...init?.headers },
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`Webacy responded ${res.status}`);

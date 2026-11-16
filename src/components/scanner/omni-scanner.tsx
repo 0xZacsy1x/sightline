@@ -6,12 +6,14 @@ import { Play } from "lucide-react";
 import { NetworkField } from "@/components/blueprint/network-field";
 import { FieldError, FormCard, FormInput, MONO_LABEL, PrimaryButton, SecondaryButton } from "@/components/blueprint/primitives";
 import { ResultSection } from "@/components/blueprint/result-section";
+import { GithubIcon } from "@/components/icons/github";
 import { PageHero } from "@/components/layout/page-hero";
 import { ScanResultCard } from "@/components/scanner/scan-result";
 import { useDemo } from "@/hooks/use-gsap";
 import { useApiPost } from "@/lib/client/use-api-post";
 import { MOCK_RISKY_CONTRACT, MOCK_SAFE_EOA } from "@/lib/mock-data";
 import { ScanResultSchema, type ScanResult } from "@/lib/scan/types";
+import { GITHUB_URL } from "@/lib/site";
 import { MAX_INPUT_LENGTH, detectInput, type Chain } from "@/lib/validations/scan";
 
 const ERROR_INVALID = "Invalid format. Paste an EVM address (0x + 40 hex), a tx hash (0x + 64 hex), or an http(s) URL.";
@@ -80,6 +82,19 @@ export function OmniScanner() {
         label="PRE-FLIGHT CHECK · BASE · ARBITRUM · ETHEREUM"
         title={["Check first,", { text: "then sign.", className: "text-[#4F7FE8]" }]}
         subtitle="Paste a wallet, contract, transaction hash, or dApp URL. Sightline returns a clear verdict before you connect or sign — read-only, no keys, no signatures."
+        action={
+          <div className="flex items-center gap-4 mt-4">
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-brand-muted hover:text-brand-cobalt transition-colors"
+            >
+              <GithubIcon className="w-4 h-4" />
+              Open Source — View on GitHub
+            </a>
+          </div>
+        }
         dotGrid="bottom-right"
       >
         <div className="flex flex-wrap items-end gap-4">

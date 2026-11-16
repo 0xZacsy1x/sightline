@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { GitHubIcon } from "@/components/brand/github-icon";
+import { GithubIcon } from "@/components/icons/github";
 import { SightlineMark } from "@/components/brand/logo";
 import { NAV_ITEMS, isActivePath } from "@/lib/nav";
 import { GITHUB_URL } from "@/lib/site";
@@ -64,10 +64,10 @@ export function SiteNav({ mockMode }: { mockMode: boolean }) {
             href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Sightline on GitHub"
-            className="rounded-sm text-brand-dark transition-colors hover:text-brand-cobalt"
+            aria-label="View source on GitHub"
+            className="text-brand-dark hover:text-brand-cobalt transition-colors"
           >
-            <GitHubIcon />
+            <GithubIcon className="w-5 h-5" />
           </a>
         </div>
       </div>

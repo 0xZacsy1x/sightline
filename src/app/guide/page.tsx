@@ -4,7 +4,7 @@ import { Gauge, KeyRound, Skull, Wallet } from "lucide-react";
 import { BentoCell, BentoGrid, NumberedItem, SectionHeading, SplitExplainer } from "@/components/blueprint/layouts";
 import { InlineCode } from "@/components/blueprint/primitives";
 import { Section, SectionLabel } from "@/components/blueprint/section";
-import { GitHubIcon } from "@/components/brand/github-icon";
+import { GithubIcon } from "@/components/icons/github";
 import { ArchitectureDiagram } from "@/components/guide/architecture-diagram";
 import { PageHero } from "@/components/layout/page-hero";
 import { GITHUB_URL } from "@/lib/site";
@@ -106,9 +106,9 @@ export default function GuidePage() {
             href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-12 items-center gap-2.5 rounded-sm bg-brand-dark px-6 font-mono text-[13px] tracking-widest text-white transition-colors hover:bg-brand-dark/90"
+            className="inline-flex items-center gap-2.5 min-h-12 px-6 bg-brand-dark text-white font-mono text-[13px] tracking-widest rounded-sm hover:bg-brand-dark/90 transition-colors"
           >
-            <GitHubIcon className="h-4 w-4" />
+            <GithubIcon className="w-4 h-4" />
             VIEW ON GITHUB
           </a>
         </div>

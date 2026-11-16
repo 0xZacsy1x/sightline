@@ -15,6 +15,7 @@ type PageHeroProps = {
   /** Plain text (one line) or explicit lines. Text only: each word animates in separately. */
   title: string | HeroTitleLine[];
   subtitle: React.ReactNode;
+  action?: React.ReactNode;
   /** `lg` = Scanner homepage (§3.1), `md` = other pages (§4.1). */
   size?: "lg" | "md";
   dotGrid?: DotGridPosition;
@@ -44,7 +45,7 @@ function HeroTitle({ lines }: { lines: HeroTitleLine[] }) {
 }
 
 /** Shared hero: section label + big sans heading + subtitle + dot-grid (UI-REFERENCE.md §3.1, §4.1). */
-export function PageHero({ label, title, subtitle, size = "md", dotGrid = "bottom-right", children }: PageHeroProps) {
+export function PageHero({ label, title, subtitle, action, size = "md", dotGrid = "bottom-right", children }: PageHeroProps) {
   const ref = useHeroIntro<HTMLDivElement>();
 
   return (
@@ -66,6 +67,11 @@ export function PageHero({ label, title, subtitle, size = "md", dotGrid = "botto
           <p data-reveal data-hero-subtitle className="max-w-[520px] text-base leading-relaxed text-[#3A4458]">
             {subtitle}
           </p>
+          {action ? (
+            <div data-reveal data-hero-subtitle className="-mt-2">
+              {action}
+            </div>
+          ) : null}
           {children ? (
             <div data-reveal data-hero-body>
               {children}

@@ -1,26 +1,105 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:is(.dark *));
+
+/* ───────────────────────────────────────────────────────────
+   Sightline design tokens — source of truth: UI-REFERENCE.md §1
+   Tailwind v4: tokens live in @theme (no tailwind.config.ts).
+   Each --color-* below generates the same class names a v3
+   `theme.extend.colors` would: bg-brand-cobalt, text-verdict-risk, …
+   ─────────────────────────────────────────────────────────── */
+
+@theme {
+  /* §1.1 brand */
+  --color-brand-cobalt: #1f4fd8;
+  --color-brand-cobalt-hover: #163ba6;
+  --color-brand-dark: #0b1220;
+  --color-brand-surface: #fbfcfe;
+  --color-brand-muted: #5a6478;
+  --color-brand-muted-2: #55607a;
+  --color-brand-border: #dce3ee;
+  --color-brand-border-strong: #c5cfdf;
+  --color-brand-input-border: #8a96ab;
+  --color-brand-pill: #ebeef3;
+
+  /* §1.1 verdict */
+  --color-verdict-safe: #0f6b4f;
+  --color-verdict-safe-bg: #e4f4ec;
+  --color-verdict-caution: #8a5a00;
+  --color-verdict-caution-bg: #fdf1d6;
+  --color-verdict-risk: #b3261e;
+  --color-verdict-risk-bg: #fce8e6;
+  --color-verdict-unknown: #3d4757;
+  --color-verdict-unknown-bg: #ebeef3;
+
+  /* §1.3 — rounded-sm is 2px (Tailwind v4's default is 4px). */
+  --radius-sm: 2px;
 }
 
 @theme inline {
+  /* §1.2 — Geist via the `geist` package (see layout.tsx) */
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-geist-sans), system-ui, sans-serif;
+
+  /* shadcn/ui semantic colours, mapped onto the brand palette */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: var(--color-brand-surface);
+  --foreground: var(--color-brand-dark);
+  --card: #ffffff;
+  --card-foreground: var(--color-brand-dark);
+  --popover: #ffffff;
+  --popover-foreground: var(--color-brand-dark);
+  --primary: var(--color-brand-cobalt);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-brand-pill);
+  --secondary-foreground: var(--color-brand-dark);
+  --muted: var(--color-brand-pill);
+  --muted-foreground: var(--color-brand-muted);
+  --accent: var(--color-brand-pill);
+  --accent-foreground: var(--color-brand-dark);
+  --destructive: var(--color-verdict-risk);
+  --border: var(--color-brand-border);
+  --input: var(--color-brand-input-border);
+  --ring: var(--color-brand-cobalt);
+  --radius: 2px;
+}
+
+@layer base {
+  * {
+    @apply border-border;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-brand-surface text-brand-dark;
+  }
+  /* §9 focus style — outline, never a shadow (§11 rule 2). */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-cobalt);
+    outline-offset: 2px;
+  }
 }

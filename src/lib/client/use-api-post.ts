@@ -1,0 +1,73 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { z } from "zod";
+
+export type ApiState<T> =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "error"; kind: "invalid" | "generic"; message: string }
+  | { status: "success"; data: T };
+
+const CLIENT_TIMEOUT_MS = 15_000;
+export const ERROR_GENERIC = "Something went wrong. Try again later.";
+
+/**
+ * POSTs JSON to one of our own /api/* routes (never to Webacy directly) and re-validates the
+ * response. A newer request aborts the previous one; a malformed payload is an error, never SAFE.
+ */
+export function useApiPost<Schema extends z.ZodType>(endpoint: string, schema: Schema) {
+  const [state, setState] = useState<ApiState<z.output<Schema>>>({ status: "idle" });
+  const controllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => controllerRef.current?.abort(), []);
+
+  const run = useCallback(
+    async (body: unknown) => {
+      controllerRef.current?.abort();
+      const controller = new AbortController();
+      controllerRef.current = controller;
+      const timeout = setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
+      const isCurrent = () => controller === controllerRef.current;
+
+      setState({ status: "loading" });
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+        const json: unknown = await res.json().catch(() => null);
+        if (!isCurrent()) return;
+
+        if (res.status === 400) {
+          const message =
+            json && typeof json === "object" && "message" in json && typeof json.message === "string"
+              ? json.message
+              : "Invalid format. Check your input.";
+          setState({ status: "error", kind: "invalid", message });
+          return;
+        }
+        if (!res.ok) {
+          setState({ status: "error", kind: "generic", message: ERROR_GENERIC });
+          return;
+        }
+
+        const parsed = schema.safeParse(json);
+        setState(
+          parsed.success
+            ? { status: "success", data: parsed.data }
+            : { status: "error", kind: "generic", message: ERROR_GENERIC },
+        );
+      } catch {
+        if (isCurrent()) setState({ status: "error", kind: "generic", message: ERROR_GENERIC });
+      } finally {
+        clearTimeout(timeout);
+      }
+    },
+    [endpoint, schema],
+  );
+
+  return { state, run };
+}

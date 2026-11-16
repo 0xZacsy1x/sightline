@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Web3 Pre-Flight Guard
+
+Dashboard *read-only* untuk melakukan *due diligence* keamanan Web3 sebelum bertransaksi—memeriksa profil risiko wallet (EOA), *smart contract*, izin *token approval*, dan tautan *phishing/drainer* di jaringan **Base**, **Arbitrum**, dan **Ethereum**.
+
+Dibangun menggunakan **Next.js 15** dan dirancang untuk integrasi dengan **Webacy (DD.xyz) Risk Engine API** ([Webacy Docs](https://docs.webacy.com/api-reference/introduction)).
+
+## Masalah yang diselesaikan
+
+- **Sulit membedakan alamat aman vs berbahaya** — *block explorer* hanya menampilkan data mentah, bukan ringkasan risiko yang mudah dipahami.
+- **Risiko *unlimited token approval*** — user sering tidak sadar telah memberi izin ke kontrak yang berpotensi menguras token ERC-20.
+- **Maraknya tautan *drainer/phishing*** — butuh lapisan pengecekan cepat (*pre-flight check*) sebelum *connect wallet* atau *signing*.
+
+## Fitur utama (MVP)
+
+1. **Address & Contract Scanner** — membedakan EOA vs *Smart Contract* (`isContract`), menampilkan skor `overallRisk`, dan daftar temuan (`issues`).
+2. **Approval Risks Checker** *(tahap lanjut)* — mendeteksi izin token berisiko tinggi.
+3. **URL Phishing Guard** *(tahap lanjut)* — memindai keamanan tautan dApp sebelum dibuka.
+4. **Fail-Closed & Mock Mode** — aman secara *default* (*unknown* saat API gagal/*stale*) dan tetap bisa diuji lokal tanpa API key.
+
+## Tech Stack
+
+Next.js 15 (App Router) · TypeScript · Tailwind CSS · shadcn/ui · Zod · Webacy (DD.xyz) API
+
+Alasan di balik setiap pilihan teknis ada di [ARCHITECTURE.md](https://www.google.com/search?q=./ARCHITECTURE.md).
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# install dependencies
+npm install
+
+# copy env template (opsional — tanpa API key akan otomatis jalan di Mock Mode)
+cp .env.example .env.local
+
+# jalankan dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# Opsional saat development awal (kosongkan untuk menggunakan Mock Mode)
+WEBACY_API_KEY=
+```
 
-## Learn More
+## Struktur proyek
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+  api/scan/route.ts       # Backend security proxy ke Webacy API + Fail-Closed logic
+  page.tsx                # UI Pre-Flight Risk Scanner
+components/
+  ui/                     # shadcn/ui primitives
+  scanner/                # Komponen domain pemindai risiko
+lib/
+  validations/            # Zod schemas (EVM address, chain, URL)
+tasks/
+  todo.md                 # Plan-first checklist (lihat AGENTS.md)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Dokumen lain
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- [ARCHITECTURE.md](https://www.google.com/search?q=./ARCHITECTURE.md) — keputusan desain, alur *fail-closed*, dan batasan MVP.
+- [AGENTS.md](https://www.google.com/search?q=./AGENTS.md) — instruksi operasional untuk AI coding agent.
 
-## Deploy on Vercel
+## Status
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MVP Tahap 1 — *Read-Only Address & Contract Scanner* siap dijalankan di *Mock Mode* sambil menyiapkan pengajuan grant DD.xyz.

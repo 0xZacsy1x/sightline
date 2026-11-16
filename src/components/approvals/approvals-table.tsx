@@ -6,6 +6,7 @@ import { MockDataBanner } from "@/components/blueprint/mock-data-banner";
 import { MONO_LABEL, ToggleButton } from "@/components/blueprint/primitives";
 import { EmptyState } from "@/components/blueprint/states";
 import { VERDICT_ICON, VERDICT_STYLES, VerdictBadge } from "@/components/blueprint/verdict-badge";
+import { useResultEnter } from "@/hooks/use-gsap";
 import { truncateHex } from "@/lib/format";
 import type { ApprovalRow, ApprovalsResult } from "@/lib/scan/types";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,8 @@ const TH = "px-4 py-3 text-left font-mono text-[11px] font-medium tracking-wides
 /** UI-REFERENCE.md §4.3 — filters + approvals table. Read-only: no revoke actions. */
 export function ApprovalsTable({ result, sample = false }: { result: ApprovalsResult; sample?: boolean }) {
   const [filter, setFilter] = useState<Filter>("all");
+  // Rows stagger in when the result first appears; switching filters afterwards is instant.
+  const ref = useResultEnter<HTMLDivElement>("rows");
 
   if (result.status === "unknown") {
     const Icon = VERDICT_ICON.UNKNOWN;
@@ -52,7 +55,7 @@ export function ApprovalsTable({ result, sample = false }: { result: ApprovalsRe
   const highCount = result.approvals.filter(FILTERS.high.match).length;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div ref={ref} className="flex flex-col gap-4">
       {sample || result.mode === "mock" ? <MockDataBanner sample={sample} /> : null}
 
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -102,6 +105,7 @@ export function ApprovalsTable({ result, sample = false }: { result: ApprovalsRe
               {rows.map((row) => (
                 <tr
                   key={`${row.tokenAddress}-${row.spenderAddress}`}
+                  data-enter-row
                   className="border-b border-dashed border-brand-border align-top last:border-b-0"
                 >
                   <td className="px-4 py-4">

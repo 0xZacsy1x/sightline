@@ -144,3 +144,52 @@ export function useScrollReveal<T extends HTMLElement = HTMLDivElement>({
     });
   });
 }
+
+/**
+ * How a freshly rendered result enters:
+ *  - `pop`   verdict card: scale up from 0.95 with a slight overshoot
+ *  - `soft`  gentle scale (safe results)
+ *  - `shake` short horizontal shake (phishing detected)
+ *  - `rows`  container stays put; only its rows stagger in
+ */
+export type ResultEnter = "pop" | "soft" | "shake" | "rows";
+
+/**
+ * Entrance for a result the moment it mounts. Inside the ref'd element, `data-flash` overlays
+ * (a verdict-coloured tint) fade out, and `data-enter-row` items stagger in.
+ */
+export function useResultEnter<T extends HTMLElement = HTMLElement>(variant: ResultEnter = "pop") {
+  return useGsap<T>((root, select) => {
+    const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+
+    if (variant === "pop") {
+      tl.fromTo(
+        root,
+        { scale: 0.95, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.4)", clearProps: "transform" },
+      );
+    } else if (variant === "soft") {
+      tl.fromTo(root, { scale: 0.98, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, clearProps: "transform" });
+    } else if (variant === "shake") {
+      tl.fromTo(root, { opacity: 0 }, { opacity: 1, duration: 0.15 });
+      tl.to(
+        root,
+        { keyframes: { x: [0, -8, 8, -6, 6, -3, 0] }, duration: 0.48, ease: "power1.inOut", clearProps: "transform" },
+        0,
+      );
+    }
+
+    const flash = select("[data-flash]");
+    if (flash.length > 0) tl.fromTo(flash, { opacity: 0.22 }, { opacity: 0, duration: 0.9 }, 0);
+
+    const rows = select("[data-enter-row]");
+    if (rows.length > 0) {
+      tl.fromTo(
+        rows,
+        { y: 10, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.4, stagger: 0.06, clearProps: "transform" },
+        variant === "rows" ? 0 : 0.2,
+      );
+    }
+  });
+}

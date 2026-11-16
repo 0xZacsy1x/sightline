@@ -3,6 +3,7 @@ import { Info } from "lucide-react";
 import { MockDataBanner } from "@/components/blueprint/mock-data-banner";
 import { MONO_LABEL } from "@/components/blueprint/primitives";
 import { VERDICT_ICON, VERDICT_STYLES } from "@/components/blueprint/verdict-badge";
+import { useResultEnter } from "@/hooks/use-gsap";
 import type { UrlCheckResult, Verdict } from "@/lib/scan/types";
 import { cn } from "@/lib/utils";
 
@@ -34,13 +35,16 @@ export function UrlResultCard({ result, sample = false }: { result: UrlCheckResu
   const Icon = VERDICT_ICON[result.verdict];
   const headline = HEADLINE[result.verdict];
   const risky = result.verdict === "HIGH_RISK";
+  // Phishing shakes, a safe result settles in gently; both flash their verdict colour once.
+  const ref = useResultEnter<HTMLElement>(risky ? "shake" : result.verdict === "SAFE" ? "soft" : "pop");
 
   return (
     <div className="flex flex-col gap-4">
       {sample || result.mode === "mock" ? <MockDataBanner sample={sample} /> : null}
 
-      <article aria-labelledby="url-verdict" className="border border-brand-border bg-white">
-        <header className={cn("flex items-start gap-4 border-b border-brand-border p-7", styles.panel)}>
+      <article ref={ref} aria-labelledby="url-verdict" className="border border-brand-border bg-white">
+        <header className={cn("relative flex items-start gap-4 border-b border-brand-border p-7", styles.panel)}>
+          <span aria-hidden="true" data-flash className={cn("pointer-events-none absolute inset-0 opacity-0", styles.fill)} />
           <Icon aria-hidden="true" className={cn("mt-0.5 size-7 shrink-0", styles.text)} strokeWidth={1.75} />
           <div className="flex flex-col gap-1.5">
             <h3 id="url-verdict" className={cn("font-sans text-2xl font-semibold tracking-tight", styles.text)}>

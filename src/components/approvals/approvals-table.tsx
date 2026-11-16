@@ -22,14 +22,14 @@ const FILTERS: Record<Filter, { label: string; match: (row: ApprovalRow) => bool
 const TH = "px-4 py-3 text-left font-mono text-[11px] font-medium tracking-widest text-brand-muted-2";
 
 /** UI-REFERENCE.md §4.3 — filters + approvals table. Read-only: no revoke actions. */
-export function ApprovalsTable({ result }: { result: ApprovalsResult }) {
+export function ApprovalsTable({ result, sample = false }: { result: ApprovalsResult; sample?: boolean }) {
   const [filter, setFilter] = useState<Filter>("all");
 
   if (result.status === "unknown") {
     const Icon = VERDICT_ICON.UNKNOWN;
     return (
       <div className="flex flex-col gap-4">
-        {result.mode === "mock" ? <MockDataBanner /> : null}
+        {sample || result.mode === "mock" ? <MockDataBanner sample={sample} /> : null}
         <div className={cn("flex items-start gap-4 border border-brand-border p-6", VERDICT_STYLES.UNKNOWN.panel)}>
           <Icon aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-verdict-unknown" />
           <div className="flex flex-col gap-1.5">
@@ -53,7 +53,7 @@ export function ApprovalsTable({ result }: { result: ApprovalsResult }) {
 
   return (
     <div className="flex flex-col gap-4">
-      {result.mode === "mock" ? <MockDataBanner /> : null}
+      {sample || result.mode === "mock" ? <MockDataBanner sample={sample} /> : null}
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div role="group" aria-label="Filter approvals" className="flex flex-wrap gap-2">

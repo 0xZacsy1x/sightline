@@ -242,8 +242,9 @@ Address   Proxy     Before
 - Dot-grid positioned differently (right, top)
 
 ### 4.2 Wallet Input Form
-- Same form card pattern as Scanner but simpler (just wallet input + INSPECT button)
-- Network selector is inline text, not buttons
+- Same form card pattern as Scanner: NETWORK toggle buttons, wallet input + INSPECT button
+- Network selector uses the same toggle buttons as the Scanner form (active = `bg-brand-dark text-white`)
+- Sample button below the dashed separator: [Sample Wallet]
 
 ### 4.3 Approvals Table
 ```
@@ -373,8 +374,8 @@ Vertical flow diagram:
 │ 100% Read-Only — Never asks        Scanner           │
 │ for your seed phrase...            Approvals          │
 │                                    URL Guard   RESOURCES │
-│                                    Security   GitHub    │
-│                                    Guide      DD.xyz    │
+│                                    Guide      GitHub    │
+│                                               DD.xyz    │
 │                                               Webacy    │
 │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─  │
 │ Powered by Webacy (DD.xyz) Risk Engine                │
@@ -391,7 +392,9 @@ Vertical flow diagram:
 
 ## 8. MOCK DATA BANNER (shared pattern)
 
-Used on all pages when `WEBACY_API_KEY` is not set:
+Used on all pages when `WEBACY_API_KEY` is not set, and above every "Try a sample" / demo result
+(those are simulated client-side from `src/lib/mock-data.ts` and never hit the API — for them the
+second sentence is dropped, since live mode may already be on):
 
 ```tsx
 <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 bg-brand-dark text-white px-4 py-3 text-[13px]">

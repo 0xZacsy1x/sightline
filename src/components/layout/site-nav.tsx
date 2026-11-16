@@ -60,17 +60,15 @@ export function SiteNav({ mockMode }: { mockMode: boolean }) {
               MOCK MODE
             </span>
           ) : null}
-          {GITHUB_URL ? (
-            <a
-              href={GITHUB_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Sightline on GitHub"
-              className="rounded-sm text-brand-dark transition-colors hover:text-brand-cobalt"
-            >
-              <GitHubIcon />
-            </a>
-          ) : null}
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Sightline on GitHub"
+            className="rounded-sm text-brand-dark transition-colors hover:text-brand-cobalt"
+          >
+            <GitHubIcon />
+          </a>
         </div>
       </div>
     </header>

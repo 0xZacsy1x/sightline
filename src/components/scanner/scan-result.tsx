@@ -50,7 +50,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 /** UI-REFERENCE.md §3.2 — verdict panel (left) + details & findings (right). All API strings as text. */
-export function ScanResultCard({ result }: { result: ScanResult }) {
+export function ScanResultCard({ result, sample = false }: { result: ScanResult; sample?: boolean }) {
   const { verdict, score, findings } = result;
   const styles = VERDICT_STYLES[verdict];
   const Icon = VERDICT_ICON[verdict];
@@ -58,7 +58,7 @@ export function ScanResultCard({ result }: { result: ScanResult }) {
 
   return (
     <div className="flex flex-col gap-4">
-      {result.mode === "mock" ? <MockDataBanner /> : null}
+      {sample || result.mode === "mock" ? <MockDataBanner sample={sample} /> : null}
 
       <article
         aria-labelledby="scan-verdict"

@@ -29,7 +29,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
  * UI-REFERENCE.md §5.3 / §5.4. The scanned URL is plain mono text — never an <a href> —
  * with `break-all` so a long phishing URL can't push the layout or hide its real host.
  */
-export function UrlResultCard({ result }: { result: UrlCheckResult }) {
+export function UrlResultCard({ result, sample = false }: { result: UrlCheckResult; sample?: boolean }) {
   const styles = VERDICT_STYLES[result.verdict];
   const Icon = VERDICT_ICON[result.verdict];
   const headline = HEADLINE[result.verdict];
@@ -37,7 +37,7 @@ export function UrlResultCard({ result }: { result: UrlCheckResult }) {
 
   return (
     <div className="flex flex-col gap-4">
-      {result.mode === "mock" ? <MockDataBanner /> : null}
+      {sample || result.mode === "mock" ? <MockDataBanner sample={sample} /> : null}
 
       <article aria-labelledby="url-verdict" className="border border-brand-border bg-white">
         <header className={cn("flex items-start gap-4 border-b border-brand-border p-7", styles.panel)}>

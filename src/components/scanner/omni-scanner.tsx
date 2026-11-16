@@ -2,15 +2,15 @@
 
 import { useId, useState } from "react";
 
-import { FieldError, FormCard, FormInput, MONO_LABEL, PrimaryButton, SecondaryButton, ToggleButton } from "@/components/blueprint/primitives";
-import { Section, SectionLabel } from "@/components/blueprint/section";
-import { EmptyState, ErrorState, LoadingState } from "@/components/blueprint/states";
+import { NetworkField } from "@/components/blueprint/network-field";
+import { FieldError, FormCard, FormInput, MONO_LABEL, PrimaryButton, SecondaryButton } from "@/components/blueprint/primitives";
+import { ResultSection } from "@/components/blueprint/result-section";
 import { PageHero } from "@/components/layout/page-hero";
 import { ScanResultCard } from "@/components/scanner/scan-result";
 import { useApiPost } from "@/lib/client/use-api-post";
-import { SAMPLES } from "@/lib/samples";
-import { ScanResultSchema } from "@/lib/scan/types";
-import { CHAINS, CHAIN_LABEL, MAX_INPUT_LENGTH, detectInput, type Chain } from "@/lib/validations/scan";
+import { MOCK_RISKY_CONTRACT, MOCK_SAFE_EOA } from "@/lib/mock-data";
+import { ScanResultSchema, type ScanResult } from "@/lib/scan/types";
+import { MAX_INPUT_LENGTH, detectInput, type Chain } from "@/lib/validations/scan";
 
 const ERROR_INVALID = "Invalid format. Paste an EVM address (0x + 40 hex), a tx hash (0x + 64 hex), or an http(s) URL.";
 
@@ -19,29 +19,27 @@ export function OmniScanner() {
   const [chain, setChain] = useState<Chain>("base");
   const [value, setValue] = useState("");
   const [fieldError, setFieldError] = useState<string | null>(null);
-  const { state, run } = useApiPost("/api/scan", ScanResultSchema);
+  const { state, run, retry, simulate } = useApiPost("/api/scan", ScanResultSchema);
   const loading = state.status === "loading";
   const inputId = useId();
   const errorId = useId();
-  const networkLabelId = useId();
 
-  function scan(raw: string, overrideChain?: Chain) {
-    const activeChain = overrideChain ?? chain;
-    const detected = detectInput(raw);
+  function scan() {
+    const detected = detectInput(value);
     if (!detected) {
       setFieldError(ERROR_INVALID);
       return;
     }
     setFieldError(null);
-    void run({ input: detected.value, chain: activeChain });
+    void run({ input: detected.value, chain });
   }
 
-  function scanSample(sample: string, targetChain?: Chain) {
-    if (targetChain) {
-      setChain(targetChain);
-    }
-    setValue(sample);
-    scan(sample, targetChain);
+  /** Sample buttons: fill the form and show the simulated result — no API call. */
+  function showSample(sample: ScanResult) {
+    setFieldError(null);
+    setChain(sample.chain);
+    setValue(sample.input);
+    simulate(sample);
   }
 
   return (
@@ -64,21 +62,10 @@ export function OmniScanner() {
           aria-label="Scan an address, transaction, or URL"
           onSubmit={(e) => {
             e.preventDefault();
-            if (!loading) scan(value);
+            if (!loading) scan();
           }}
         >
-          <div className="grid grid-cols-1 items-center gap-3 sm:grid-cols-[130px_1fr]">
-            <span id={networkLabelId} className={MONO_LABEL}>
-              NETWORK
-            </span>
-            <div role="group" aria-labelledby={networkLabelId} className="flex flex-wrap gap-2">
-              {CHAINS.map((c) => (
-                <ToggleButton key={c} active={chain === c} onClick={() => setChain(c)}>
-                  {CHAIN_LABEL[c]}
-                </ToggleButton>
-              ))}
-            </div>
-          </div>
+          <NetworkField value={chain} onChange={setChain} />
 
           <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-[130px_1fr]">
             <label htmlFor={inputId} className={`${MONO_LABEL} sm:pt-4`}>
@@ -109,11 +96,11 @@ export function OmniScanner() {
 
           <div className="flex flex-wrap items-center gap-3 border-t border-dashed border-brand-border-strong pt-5">
             <span className="text-sm text-[#3A4458]">Try a sample:</span>
-            <SecondaryButton disabled={loading} onClick={() => scanSample(SAMPLES.safeEoa, "eth")}>
+            <SecondaryButton disabled={loading} onClick={() => showSample(MOCK_SAFE_EOA)}>
               <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-verdict-safe" />
               Safe EOA
             </SecondaryButton>
-            <SecondaryButton disabled={loading} onClick={() => scanSample(SAMPLES.riskyContract, "eth")}>
+            <SecondaryButton disabled={loading} onClick={() => showSample(MOCK_RISKY_CONTRACT)}>
               <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-verdict-risk" />
               Risky Contract
             </SecondaryButton>
@@ -121,17 +108,16 @@ export function OmniScanner() {
         </FormCard>
       </PageHero>
 
-      <Section aria-labelledby="scan-results-label">
-        <div className="flex flex-col gap-6" aria-live="polite" aria-busy={loading}>
-          <SectionLabel>
-            <span id="scan-results-label">SCAN RESULTS</span>
-          </SectionLabel>
-          {state.status === "idle" ? <EmptyState>No results yet — run a scan or try a sample above.</EmptyState> : null}
-          {state.status === "loading" ? <LoadingState>SCANNING…</LoadingState> : null}
-          {state.status === "error" ? <ErrorState message={state.message} /> : null}
-          {state.status === "success" ? <ScanResultCard result={state.data} /> : null}
-        </div>
-      </Section>
+      <ResultSection
+        label="SCAN RESULTS"
+        state={state}
+        empty="No results yet — run a scan or try a sample above."
+        loading="SCANNING…"
+        skeleton="scan"
+        onRetry={retry}
+      >
+        {(result, sample) => <ScanResultCard result={result} sample={sample} />}
+      </ResultSection>
     </>
   );
 }

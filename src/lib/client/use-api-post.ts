@@ -7,7 +7,8 @@ export type ApiState<T> =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "error"; kind: "invalid" | "generic"; message: string }
-  | { status: "success"; data: T };
+  /** `sample` = simulated data shown without an API call. `id` changes with every new result. */
+  | { status: "success"; data: T; sample: boolean; id: number };
 
 const CLIENT_TIMEOUT_MS = 15_000;
 export const ERROR_GENERIC = "Something went wrong. Try again later.";
@@ -17,8 +18,11 @@ export const ERROR_GENERIC = "Something went wrong. Try again later.";
  * response. A newer request aborts the previous one; a malformed payload is an error, never SAFE.
  */
 export function useApiPost<Schema extends z.ZodType>(endpoint: string, schema: Schema) {
-  const [state, setState] = useState<ApiState<z.output<Schema>>>({ status: "idle" });
+  type Data = z.output<Schema>;
+  const [state, setState] = useState<ApiState<Data>>({ status: "idle" });
   const controllerRef = useRef<AbortController | null>(null);
+  const lastBodyRef = useRef<unknown>(undefined);
+  const idRef = useRef(0);
 
   useEffect(() => () => controllerRef.current?.abort(), []);
 
@@ -27,6 +31,7 @@ export function useApiPost<Schema extends z.ZodType>(endpoint: string, schema: S
       controllerRef.current?.abort();
       const controller = new AbortController();
       controllerRef.current = controller;
+      lastBodyRef.current = body;
       const timeout = setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
       const isCurrent = () => controller === controllerRef.current;
 
@@ -57,7 +62,7 @@ export function useApiPost<Schema extends z.ZodType>(endpoint: string, schema: S
         const parsed = schema.safeParse(json);
         setState(
           parsed.success
-            ? { status: "success", data: parsed.data }
+            ? { status: "success", data: parsed.data, sample: false, id: ++idRef.current }
             : { status: "error", kind: "generic", message: ERROR_GENERIC },
         );
       } catch {
@@ -69,5 +74,28 @@ export function useApiPost<Schema extends z.ZodType>(endpoint: string, schema: S
     [endpoint, schema],
   );
 
-  return { state, run };
+  /** Re-send the last request (the "Try again" button on a failed request). */
+  const retry = useCallback(() => {
+    if (lastBodyRef.current !== undefined) void run(lastBodyRef.current);
+  }, [run]);
+
+  /**
+   * Show simulated data without calling the API — sample buttons and the demo. With `delayMs`
+   * the loading state is shown first. Cancels any in-flight request, and is cancelled by a newer one.
+   */
+  const simulate = useCallback((data: Data, delayMs = 0) => {
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    const finish = () => setState({ status: "success", data, sample: true, id: ++idRef.current });
+    if (delayMs <= 0) {
+      finish();
+      return;
+    }
+    setState({ status: "loading" });
+    const timer = setTimeout(finish, delayMs);
+    controller.signal.addEventListener("abort", () => clearTimeout(timer));
+  }, []);
+
+  return { state, run, retry, simulate };
 }

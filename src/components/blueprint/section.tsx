@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 /** UI-REFERENCE.md §1.4 — the `+` marks where a section's top border meets <main>'s side borders. */
@@ -43,9 +44,13 @@ type SectionProps = React.ComponentPropsWithoutRef<"section"> & {
 };
 
 /** A full-width band inside <main>, separated by a top border with `+` corner marks. */
-export function Section({ size = "major", bordered = true, className, children, ...props }: SectionProps) {
+export const Section = forwardRef<HTMLElement, SectionProps>(function Section(
+  { size = "major", bordered = true, className, children, ...props },
+  ref,
+) {
   return (
     <section
+      ref={ref}
       className={cn("relative px-8", size === "major" ? "py-14" : "py-10", bordered && "border-t border-brand-border", className)}
       {...props}
     >
@@ -53,4 +58,4 @@ export function Section({ size = "major", bordered = true, className, children, 
       {children}
     </section>
   );
-}
+});

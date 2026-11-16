@@ -97,5 +97,11 @@ export function useApiPost<Schema extends z.ZodType>(endpoint: string, schema: S
     controller.signal.addEventListener("abort", () => clearTimeout(timer));
   }, []);
 
-  return { state, run, retry, simulate };
+  /** Reset state to idle, canceling any pending in-flight request or simulation timer. */
+  const reset = useCallback(() => {
+    controllerRef.current?.abort();
+    setState({ status: "idle" });
+  }, []);
+
+  return { state, run, retry, simulate, reset };
 }

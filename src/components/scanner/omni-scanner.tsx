@@ -23,7 +23,7 @@ export function OmniScanner() {
   const [chain, setChain] = useState<Chain>("base");
   const [value, setValue] = useState("");
   const [fieldError, setFieldError] = useState<string | null>(null);
-  const { state, run, retry, simulate } = useApiPost("/api/scan", ScanResultSchema);
+  const { state, run, retry, simulate, reset } = useApiPost("/api/scan", ScanResultSchema);
   const playDemoScript = useDemo();
   const [demoTyping, setDemoTyping] = useState(false);
   const loading = state.status === "loading";
@@ -51,13 +51,20 @@ export function OmniScanner() {
 
   /**
    * WATCH DEMO: types the sample address (0–1.2s), selects its network, shows the loading
-   * state (1.5s), then the simulated HIGH RISK verdict (3s). No API call.
+   * state (1.2s), then smoothly scrolls to the simulated HIGH RISK verdict. No API call.
    */
   function playDemo() {
     const sample = MOCK_RISKY_CONTRACT;
+    reset();
     setFieldError(null);
     setValue("");
     setDemoTyping(true);
+
+    if (typeof window !== "undefined" && window.scrollY > 80) {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+    }
+
     playDemoScript({
       text: sample.input,
       typeDuration: 1.2,
@@ -68,7 +75,7 @@ export function OmniScanner() {
           at: 1.5,
           run: () => {
             setDemoTyping(false);
-            simulate(sample, 1500);
+            simulate(sample, 1200);
           },
         },
       ],

@@ -14,6 +14,7 @@ type ResultSectionProps<T> = {
   loading: string;
   skeleton: SkeletonVariant;
   onRetry: () => void;
+  id?: string;
   /** Renders a successful result. `sample` = simulated data shown without an API call. */
   children: (data: T, sample: boolean) => React.ReactNode;
 };
@@ -22,27 +23,39 @@ type ResultSectionProps<T> = {
  * The result band under every form: empty → loading skeleton → error (with retry) → result.
  * Scrolls itself into view when something happens, so a result below the fold is never missed.
  */
-export function ResultSection<T>({ label, state, empty, loading, skeleton, onRetry, children }: ResultSectionProps<T>) {
-  const ref = useRef<HTMLDivElement>(null);
-  const labelId = `${label.toLowerCase().replace(/\s+/g, "-")}-label`;
+export function ResultSection<T>({ label, state, empty, loading, skeleton, onRetry, id, children }: ResultSectionProps<T>) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const sectionId = id ?? label.toLowerCase().replace(/\s+/g, "-");
+  const labelId = `${sectionId}-label`;
   const stage = state.status === "success" ? state.id : state.status;
 
   useEffect(() => {
     if (stage === "idle") return;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const behavior = reduceMotion ? "auto" : "smooth";
-    const timer = setTimeout(() => {
-      ref.current?.scrollIntoView({ block: "start", behavior });
-    }, 60);
+
+    const scrollToSection = () => {
+      const el = sectionRef.current;
+      if (!el) return;
+
+      const nav = document.querySelector("header");
+      const navHeight = (nav?.getBoundingClientRect().height ?? 64) + 12;
+      const targetY = el.getBoundingClientRect().top + window.scrollY - navHeight;
+
+      window.scrollTo({
+        top: Math.max(0, targetY),
+        behavior,
+      });
+    };
+
+    const timer = setTimeout(scrollToSection, 80);
     return () => clearTimeout(timer);
   }, [stage]);
 
   return (
-    <Section aria-labelledby={labelId}>
-      {/* Scroll margins: clear the sticky navbar above, leave a little air below. */}
+    <Section ref={sectionRef} id={sectionId} aria-labelledby={labelId}>
       <div
-        ref={ref}
-        className="flex scroll-mt-20 scroll-mb-6 flex-col gap-6"
+        className="flex flex-col gap-6"
         aria-live="polite"
         aria-busy={state.status === "loading"}
       >

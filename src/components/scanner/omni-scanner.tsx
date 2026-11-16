@@ -47,13 +47,7 @@ export function OmniScanner() {
       <PageHero
         size="lg"
         label="PRE-FLIGHT CHECK · BASE · ARBITRUM · ETHEREUM"
-        title={
-          <>
-            Check first,
-            <br />
-            <span className="text-[#4F7FE8]">then sign.</span>
-          </>
-        }
+        title={["Check first,", { text: "then sign.", className: "text-[#4F7FE8]" }]}
         subtitle="Paste a wallet, contract, transaction hash, or dApp URL. Sightline returns a clear verdict before you connect or sign — read-only, no keys, no signatures."
         dotGrid="bottom-right"
       >

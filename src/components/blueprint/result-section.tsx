@@ -30,7 +30,11 @@ export function ResultSection<T>({ label, state, empty, loading, skeleton, onRet
   useEffect(() => {
     if (stage === "idle") return;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    ref.current?.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+    const behavior = reduceMotion ? "auto" : "smooth";
+    const timer = setTimeout(() => {
+      ref.current?.scrollIntoView({ block: "start", behavior });
+    }, 60);
+    return () => clearTimeout(timer);
   }, [stage]);
 
   return (
@@ -38,7 +42,7 @@ export function ResultSection<T>({ label, state, empty, loading, skeleton, onRet
       {/* Scroll margins: clear the sticky navbar above, leave a little air below. */}
       <div
         ref={ref}
-        className="flex scroll-mt-24 scroll-mb-6 flex-col gap-6"
+        className="flex scroll-mt-20 scroll-mb-6 flex-col gap-6"
         aria-live="polite"
         aria-busy={state.status === "loading"}
       >
